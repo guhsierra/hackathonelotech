@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PlanUrb – Visão Geral</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --verde: #67e480;
+      --fundo: #121212;
+      --claro: #ffffff;
+      --cinza: #2d2d2d;
+      --texto: #bbbbbb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      background-color: var(--fundo);
+      color: var(--texto);
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+
+    aside {
+      width: 240px;
+      background-color: var(--cinza);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    aside h1 {
+      color: var(--verde);
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+    }
+
+    .menu-item {
+      text-decoration: none;
+      color: var(--claro);
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+
+    .menu-item:hover {
+      background-color: var(--verde);
+      color: var(--fundo);
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 240px; /* espaço do aside */
+      right: 0;
+      height: 60px;
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 999;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 80px 20px 20px 20px; /* <- espaço superior aumentado para o header fixo */
+      overflow-y: auto;
+    }
+
+    header h2 {
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    form label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    form input {
+      margin-bottom: 15px;
+    }
+
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 240px;
+      right: 0;
+      height: 60px;
+      background-color: #0f0f0f;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      z-index: 1000;
+      border-bottom: 1px solid #333;
+    }
+
+    .top-left .bemvindo {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+    }
+
+    .notificacoes,
+    .usuario-wrapper img {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.3rem;
+    }
+
+    .usuario-wrapper img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--verde);
+    }
+
+    .notificacoes-dropdown,
+    .usuario-dropdown {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background-color: #222;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.5);
+      width: 220px;
+      font-size: 0.9rem;
+      z-index: 1001;
+    }
+
+    .notificacoes-dropdown p,
+    .usuario-dropdown p {
+      margin: 8px 0;
+    }
+
+    .usuario-dropdown hr {
+      border: 0;
+      height: 1px;
+      background-color: #444;
+      margin: 10px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+    .resumo {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      flex: 1;
+      background-color: var(--cinza);
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .card h3 {
+      color: var(--verde);
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .mapa {
+      height: 400px;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .section {
+      background-color: #1d1d1d;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .section h2 {
+      color: var(--verde);
+      margin-bottom: 20px;
+    }
+
+    .section p, .section label {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .section input, .section select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 20px;
+      background-color: var(--cinza);
+      color: var(--claro);
+    }
+
+    .section button {
+      background-color: var(--verde);
+      color: var(--fundo);
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .section button:hover {
+      background-color: #4cd964;
+    }
+
+    .grafico-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1px;
+      margin-top: 20px;
+    }
+
+    .grafico-container img {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 8px;
+    }
+
+    .info.legenda {
+      background: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .info.legenda i {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    #comoFunciona {
+      background-color: #1a1a1a;
+      padding: 40px;
+      border-radius: 16px;
+      margin-top: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      color: #ffffff;
+    }
+
+    #comoFunciona h2 {
+      color: #67e480;
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .etapas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-between;
+    }
+
+    .etapas .card {
+      background-color: #2a2a2a;
+      padding: 20px;
+      border-radius: 12px;
+      flex: 1 1 30%;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    .etapas .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 15px rgba(103, 228, 128, 0.4);
+    }
+
+    .etapas .card h3 {
+      color: #67e480;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    .etapas .card p {
+      font-size: 0.95rem;
+      color: #cccccc;
+    }
+
+    #comoFunciona .exemplo {
+      background-color: #2f2f2f;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: #dddddd;
+    }
+
+    #comoFunciona .exemplo h3 {
+      color: #67e480;
+      margin-bottom: 10px;
+    }
+
+    #comoFunciona .exemplo ul {
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+
+    #comoFunciona .exemplo li {
+      margin-bottom: 6px;
+    }
+
+
+  </style>
+</head>
+<body>
+  <aside>
+    <h1></h1>
+    <div class="menu-item" onclick="mostrarSecao('visaoGeral')">Visão Geral</div>
+    <div class="menu-item" onclick="mostrarSecao('simulacao')">Simular Cenário</div>
+    <div class="menu-item" onclick="mostrarSecao('relatorios')">Relatórios</div>
+    <!-- <div class="menu-item" onclick="mostrarSecao('cameras')">Câmeras</div> -->
+    <div class="menu-item" onclick="mostrarSecao('configuracoes')">Configurações</div>
+    <div class="menu-item" onclick="mostrarSecao('comoFunciona')">Como Funciona?</div>
+  </aside>
+  
+  <main>
+    <header class="top-bar">
+      <div class="top-left">
+        <span class="bemvindo">👋 Bem-vindo, João!</span>
+      </div>
+      <div class="top-right">
+        <div class="notificacoes-wrapper">
+          <button class="notificacoes" onclick="toggleNotificacoes()">🔔</button>
+          <div class="notificacoes-dropdown hidden" id="notificacoesDropdown">
+            <p>🚧 Interdição na Av. Brasil</p>
+            <p>📊 Novo relatório disponível</p>
+            <p>📣 Atualização do sistema</p>
+          </div>
+        </div>
+        <div class="usuario-wrapper">
+          <img src="https://i.pravatar.cc/40?u=joao" alt="Usuário" onclick="togglePerfil()" />
+          <div class="usuario-dropdown hidden" id="usuarioDropdown">
+            <p><strong>João da Silva</strong></p>
+            <p>Conta: Administrador</p>
+            <hr />
+            <p style="color: #67e480; cursor: pointer;">Sair</p>
+          </div>
+        </div>
+      </div>
+    </header>
+      <section id="visaoGeral" class="section">
+        <div class="resumo">
+          <div class="card"><h3>Fluxo diário</h3><p>🚶 12.300 pessoas</p></div>
+          <div class="card"><h3>Impacto de obras</h3><p>🚧 -18% no tráfego</p></div>
+          <div class="card"><h3>Horário de pico</h3><p>🕒 17h às 19h</p></div>
+        </div>
+
+        <div class="mapa">
+          <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
+        </div>
+        <div class="card">
+          <h3>Tráfego em Tempo Real – Av. Colombo</h3>
+          <canvas id="graficoTrafego" height="150"></canvas>
+        </div>
+      </section>
+      <section id="comoFunciona" class="section hidden">
+        <h2>🧠 Como a IA detecta uma interdição urbana</h2>
+
+        <div class="etapas">
+          <div class="card">
+            <h3>🎥 Etapa 1: Análise em tempo real</h3>
+            <p>A IA observa imagens das câmeras e detecta objetos como <strong>cones, caminhões e operários</strong>.</p>
+          </div>
+          <div class="card">
+            <h3>📊 Etapa 2: Comparação com o normal</h3>
+            <p>Compara o tráfego atual com padrões históricos. Reduções ou desvios indicam <strong>anomalias</strong>.</p>
+          </div>
+          <div class="card">
+            <h3>📌 Etapa 3: Conclusão e alerta</h3>
+            <p>Confirma a interdição, marca no <strong>mapa</strong> e envia um alerta ao sistema.</p>
+          </div>
+        </div>
+
+        <div class="exemplo">
+          <h3>📍 Exemplo visual:</h3>
+          <ul>
+            <li>🔴 Rua com faixa vermelha no mapa</li>
+            <li>📝 “Av. Paraná interditada às 14h32 por obra”</li>
+            <li>🔄 72% de tráfego desviado para Av. São Paulo</li>
+          </ul>
+        </div>
+      </section>
+
+
+      <section id="simulacao" class="section hidden">
+        <h2>Simular Cenário</h2>
+        <label for="tipo">Tipo de intervenção:</label>
+        <select id="tipo">
+          <option>Obra</option>
+          <option>Fechamento de rua</option>
+          <option>Evento</option>
+          <option>Semaforo</option>
+          <option>Parque</option>
+          <option>Faixa de pedestre</option>
+        </select>
+        <label for="local">Local:</label>
+        <input type="text" id="local" placeholder="Ex: Av. Brasil">
+        <label for="data">Data prevista:</label>
+        <input type="date" id="data">
+        <button>Simular Impacto</button>
+        <div id="resultadoIA" style="margin-top: 20px; padding: 20px; background-color: #222; border-radius: 8px; display: none;">
+          <h3 style="color: var(--verde); margin-bottom: 10px;">Previsão de Impacto</h3>
+          <p id="textoPrevisao">Analisando...</p>
+        </div>
+        <div id="resultadoVisual" style="margin-top: 30px; display: none;">
+          <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            
+            <!-- Gráfico de impacto -->
+            <div style="flex: 1; min-width: 300px;">
+              <h3 style="color: var(--verde); margin-bottom: 10px;">📈 Variação do Tráfego</h3>
+              <!-- <div class="grafico-container">
+                <img src="https://fakeimg.pl/500x300/67e480/000?text=Tr%C3%A1fego+por+Hora" alt="Tráfego por hora">
+              </div> -->
+              <div class="grafico-container" style="display: flex; flex-wrap: wrap; gap: 30px;">
+                <div style="flex: 1; min-width: 300px;">
+                  <canvas id="graficoHora"></canvas>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Mapa da intervenção -->
+            <div style="flex: 1; min-width: 300px;">
+              <h3 style="color: var(--verde); margin-bottom: 10px;">🗺️ Local da Intervenção</h3>
+              <!-- <div class="grafico-container">
+                <img src="https://fakeimg.pl/500x300/e63946/000?text=Picos+por+Regi%C3%A3o" alt="Picos por Região">
+              </div> -->
+              <div class="grafico-container" style="display: flex; flex-wrap: wrap; gap: 30px;">
+                <div style="flex: 1; min-width: 300px;">
+                  <canvas id="graficoComparativo"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+
+          <!-- Resumo estatístico -->
+          <div style="margin-top: 20px; background: #1e1e1e; padding: 20px; border-radius: 10px;">
+            <h3 style="color: var(--verde); margin-bottom: 10px;">🔍 Análise da IA</h3>
+            <ul style="line-height: 1.6;">
+              <li>🕒 Aumento estimado no tempo de deslocamento: <strong id="tempoDeslocamento">22%</strong></li>
+              <li>🚗 Redução no fluxo principal: <strong id="reducaoFluxo">-18%</strong></li>
+              <li>🔀 Tráfego desviado para vias secundárias: <strong id="desvioEstimado">68%</strong></li>
+              <li>📌 Observação: <span id="observacaoIA">Obra afeta rotas próximas da Av. Brasil</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+  <!-- Atualização da Tabela de Relatórios com Novas Colunas -->
+  <section id="relatorios" class="section hidden">
+    <h2>Relatórios</h2>
+    <p>Gráficos de impacto urbano, exportação de dados e tendências históricas.</p>
+    <div class="grafico-container">
+      <div class="grafico-container" style="display: flex; flex-wrap: wrap; gap: 30px;">
+        <div style="flex: 1; min-width: 300px;">
+          <canvas id="graficoMensal"></canvas>
+        </div>
+        <div style="flex: 1; min-width: 300px;">
+          <canvas id="graficoRegiao"></canvas>
+        </div>
+      </div>    
+    </div>
+
+    <!-- Filtros -->
+    <div style="margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+      <select id="filtroTipo">
+        <option value="">Todos os tipos</option>
+        <option>Obra</option>
+        <option>Evento</option>
+        <option>Fechamento de rua</option>
+      </select>
+      <input type="date" id="filtroData">
+      <input type="text" id="filtroLocal" placeholder="Buscar por local...">
+      <button onclick="aplicarFiltros()">🔍 Filtrar</button>
+      <button onclick="exportarPDF()">📄 Exportar PDF</button>
+    </div>
+
+    <!-- Tabela de relatórios -->
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #333; color: white;">
+          <th style="padding: 10px;">Tipo</th>
+          <th>Local</th>
+          <th>Data</th>
+          <th>Pessoas</th>
+          <th>Veículos</th>
+          <th>Velocidade Média</th>
+          <th>Perfil Populacional</th>
+          <th>Impacto</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaRelatorios"></tbody>
+    </table>
+  </section>
+
+  <script>
+  const relatorios = [
+    {
+      tipo: 'Obra',
+      local: 'Av. Brasil',
+      data: '2025-05-21',
+      pessoas: '12.300',
+      veiculos: '6.200',
+      velocidade: '32 km/h',
+      perfil: 'Adultos (25–40 anos)',
+      impacto: '35%'
+    },
+    {
+      tipo: 'Evento',
+      local: 'Praça Central',
+      data: '2025-05-22',
+      pessoas: '9.800',
+      veiculos: '4.900',
+      velocidade: '28 km/h',
+      perfil: 'Famílias e Jovens',
+      impacto: '18%'
+    },
+    {
+      tipo: 'Fechamento de rua',
+      local: 'Rua das Palmeiras',
+      data: '2025-05-23',
+      pessoas: '6.700',
+      veiculos: '3.100',
+      velocidade: '24 km/h',
+      perfil: 'Estudantes e Idosos',
+      impacto: '25%'
+    }
+  ];
+
+  function renderizarTabela(filtrados = relatorios) {
+    const corpo = document.getElementById('tabelaRelatorios');
+    corpo.innerHTML = '';
+    filtrados.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="padding: 8px; background: #1d1d1d;">${r.tipo}</td>
+        <td style="padding: 8px;">${r.local}</td>
+        <td style="padding: 8px;">${r.data}</td>
+        <td style="padding: 8px;">${r.pessoas}</td>
+        <td style="padding: 8px;">${r.veiculos}</td>
+        <td style="padding: 8px;">${r.velocidade}</td>
+        <td style="padding: 8px;">${r.perfil}</td>
+        <td style="padding: 8px;">${r.impacto}</td>
+        <td style="padding: 8px;"><button onclick="verDetalhes('${r.tipo}', '${r.local}', '${r.data}', '${r.impacto}')">📄 Ver</button></td>
+      `;
+      corpo.appendChild(tr);
+    });
+  }
+
+  function aplicarFiltros() {
+    const tipo = document.getElementById('filtroTipo').value;
+    const data = document.getElementById('filtroData').value;
+    const local = document.getElementById('filtroLocal').value.toLowerCase();
+
+    const filtrados = relatorios.filter(r => {
+      return (!tipo || r.tipo === tipo) &&
+            (!data || r.data === data) &&
+            (!local || r.local.toLowerCase().includes(local));
+    });
+
+    renderizarTabela(filtrados);
+  }
+
+  function verDetalhes(tipo, local, data, impacto) {
+    alert(`Tipo: ${tipo}\nLocal: ${local}\nData: ${data}\nImpacto previsto: ${impacto}`);
+  }
+
+  async function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Relatórios de Impacto Urbano", 20, 20);
+
+    relatorios.forEach((r, i) => {
+      doc.setFontSize(10);
+      doc.text(`• ${r.tipo} em ${r.local} (${r.data})`, 20, 40 + i * 20);
+      doc.text(`  Pessoas: ${r.pessoas}  | Veículos: ${r.veiculos}`, 20, 45 + i * 20);
+      doc.text(`  Velocidade Média: ${r.velocidade}  | Perfil: ${r.perfil}  | Impacto: ${r.impacto}`, 20, 50 + i * 20);
+    });
+
+    doc.save("relatorios_planurb.pdf");
+  }
+
+  renderizarTabela();
+  </script>
+      <!-- <section id="cameras" class="section hidden">
+        <h2>Câmeras</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+          <div>
+            <h4>Av. Colombo</h4>
+            <img src="https://fakeimg.pl/320x240/?text=Câmera+1" alt="Câmera 1">
+          </div>
+          <div>
+            <h4>Av. Brasil</h4>
+            <img src="https://fakeimg.pl/320x240/?text=Câmera+2" alt="Câmera 2">
+          </div>
+        </div>
+        <p>Monitoramento ao vivo das vias principais com câmeras posicionadas.</p>
+      </section>
+  -->
+      <section id="configuracoes" class="section hidden">
+        <h2>⚙️ Configurações da Conta</h2>
+
+        <form id="formConfiguracoes" onsubmit="salvarConfiguracoes(event)">
+          <label for="nome">Nome:</label>
+          <input type="text" id="nome" value="João da Silva">
+
+          <label for="email">Email:</label>
+          <input type="email" id="email" value="joao@email.com">
+
+          <label for="telefone">Telefone:</label>
+          <input type="tel" id="telefone" value="(44) 99999-0000">
+
+          <button type="submit">💾 Salvar Alterações</button>
+        </form>
+
+        <hr style="margin: 30px 0; border-color: #444;">
+
+        <div>
+          <h3 style="color: var(--verde); margin-bottom: 10px;">📞 Contato com a PlanUrb</h3>
+          <p>📧 suporte@planurb.com</p>
+          <p>📱 (44) 4002-8922</p>
+          <p>🕘 Atendimento: Segunda a Sexta, das 08h às 18h</p>
+        </div>
+      </section>
+
+    
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  
+    <script>
+      const map = L.map('map').setView([-23.420999, -51.933056], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const pontos = [
+        [-23.420999, -51.933056, 1.0], [-23.4215, -51.9350, 0.9],
+        [-23.4230, -51.9310, 0.8], [-23.4190, -51.9320, 0.85],
+        [-23.4225, -51.9370, 1.0], [-23.4261, -51.9397, 0.8],
+        [-23.4235, -51.9420, 0.7], [-23.4280, -51.9410, 0.75],
+        [-23.4138, -51.9431, 0.6], [-23.4150, -51.9445, 0.5],
+        [-23.4092, -51.9260, 0.8], [-23.4070, -51.9275, 0.7],
+        [-23.4060, -51.9250, 0.65], [-23.4200, -51.9510, 0.9],
+        [-23.4185, -51.9500, 0.85], [-23.4170, -51.9490, 0.8],
+        [-23.4110, -51.9345, 0.7], [-23.4175, -51.9300, 0.75],
+        [-23.4308, -51.9367, 0.6], [-23.4320, -51.9380, 0.5]
+      ];
+
+      L.heatLayer(pontos, {
+        radius: 40,
+        blur: 15,
+        maxZoom: 17,
+        gradient: {
+          0.4: '#67e480',
+          0.65: '#ffdd57',
+          1.0: '#e63946'
+        }
+      }).addTo(map);
+
+
+      // Simulacao IA
+      document.querySelector("#simulacao button").addEventListener("click", () => {
+        document.getElementById("resultadoIA").style.display = "block";
+        document.getElementById("textoPrevisao").innerText = "Obra na Av. Brasil causará aumento de 22% no tempo de deslocamento.";
+      });
+
+      // Chart
+      const ctx = document.getElementById('graficoTrafego').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['06h', '08h', '10h', '12h', '14h', '16h', '18h', '20h'],
+          datasets: [{
+            label: 'Veículos por hora',
+            data: [300, 450, 380, 500, 420, 600, 750, 400],
+            borderColor: '#67e480',
+            fill: false
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });        
+
+      const cameraIcon = L.icon({
+        iconUrl: 'data:image/png;base64,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',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -12]
+      });
+
+      const cameras = [
+        [-23.420999, -51.933056], [-23.4235, -51.9320],
+        [-23.4198, -51.9340], [-23.4110, -51.9345],
+        [-23.4308, -51.9367], [-23.4092, -51.9260],
+        [-23.4200, -51.9510], [-23.4180, -51.9215],
+        [-23.4235, -51.9420], [-23.4175, -51.9300],
+        [-23.4261, -51.9397], [-23.4290, -51.9405],
+        [-23.4138, -51.9431]
+      ];
+
+      cameras.forEach(coord => {
+        L.marker(coord, { icon: cameraIcon }).addTo(map).bindPopup('📷 Câmera de Monitoramento');
+      });
+
+      const legenda = L.control({ position: 'bottomright' });
+      legenda.onAdd = function () {
+        const div = L.DomUtil.create('div', 'info legenda');
+        div.innerHTML = `
+          <h4>Intensidade</h4>
+          <i style="background:#00f"></i> Baixa<br/>
+          <i style="background:#0f0"></i> Média<br/>
+          <i style="background:#f00"></i> Alta<br/>
+        `;
+        return div;
+      };
+      legenda.addTo(map);
+
+      
+      function mostrarSecao(id) {
+        const secoes = document.querySelectorAll('main .section');
+        secoes.forEach(secao => secao.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        }
+      
+
+
+    if (id === 'visaoGeral') {
+      setTimeout(() => map.invalidateSize(), 200);
+    }
+
+
+
+      
+
+      
+      setInterval(() => {
+        const novoValor = Math.floor(Math.random() * 60 + 20);
+        grafico.data.datasets[0].data.push(novoValor);
+        grafico.data.datasets[0].data.shift();
+        grafico.update();
+      }, 3000);
+    </script>
+    <script>
+      const botaoSimular = document.querySelector('#simulacao button');
+      const resultadoIA = document.getElementById('resultadoIA');
+      const textoPrevisao = document.getElementById('textoPrevisao');
+
+      botaoSimular.addEventListener('click', () => {
+        const tipo = document.getElementById('tipo').value;
+        const local = document.getElementById('local').value.trim();
+        const data = document.getElementById('data').value;
+
+        if (!tipo || !local || !data) {
+          alert("Por favor, preencha todos os campos.");
+          return;
+        }
+
+        resultadoIA.style.display = 'block';
+        textoPrevisao.textContent = "Analisando dados de tráfego e padrões históricos...";
+        document.getElementById("resultadoVisual").style.display = "block";
+
+        // Atualiza os dados no painel
+        document.getElementById("tempoDeslocamento").textContent = `${impacto}%`;
+        document.getElementById("reducaoFluxo").textContent = `-${Math.floor(impacto * 0.6)}%`;
+        document.getElementById("desvioEstimado").textContent = `${Math.floor(impacto * 2)}%`;
+        document.getElementById("observacaoIA").textContent = `Impacto concentrado nas rotas próximas de ${local}`;
+
+        // Gera o gráfico
+        const ctxSim = document.getElementById('graficoSimulacao').getContext('2d');
+        new Chart(ctxSim, {
+          type: 'line',
+          data: {
+            labels: ['06h', '08h', '10h', '12h', '14h', '16h', '18h'],
+            datasets: [
+              {
+                label: 'Antes da Intervenção',
+                data: [400, 600, 550, 500, 650, 700, 600],
+                borderColor: '#67e480',
+                fill: false
+              },
+              {
+                label: 'Após Intervenção',
+                data: [400, 620, 580, 540, 780, 880, 700],
+                borderColor: '#e63946',
+                fill: false
+              }
+            ]
+          },
+          options: {
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+
+        // Mostra o mapa com marcador
+        const mapaMini = L.map('mapaSimulacao').setView([-23.420999, -51.933056], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaMini);
+        L.marker([-23.420999, -51.933056]).addTo(mapaMini).bindPopup(`📍 Intervenção em ${local}`).openPopup();
+
+        // Simulação de análise por IA
+        setTimeout(() => {
+          let impacto = Math.floor(Math.random() * 30) + 10; // entre 10% e 40%
+          let mensagem = `Prevê-se um impacto de ${impacto}% no tráfego da região de ${local}, especialmente nos horários de pico.`;
+          if (tipo === "Evento") {
+            mensagem += " Como é um evento, o impacto será concentrado antes e depois do horário principal.";
+          } else if (tipo === "Fechamento de rua") {
+            mensagem += " Desvios podem causar lentidão nas vias paralelas.";
+          } else {
+            mensagem += " Obras prolongadas tendem a gerar impactos consistentes durante todo o dia.  ";
+          }
+
+          textoPrevisao.textContent = mensagem;
+        }, 1500);
+      });
+    </script>
+    <script>
+  function toggleNotificacoes() {
+    document.getElementById('notificacoesDropdown').classList.toggle('hidden');
+    document.getElementById('usuarioDropdown').classList.add('hidden');
+  }
+
+  function togglePerfil() {
+    document.getElementById('usuarioDropdown').classList.toggle('hidden');
+    document.getElementById('notificacoesDropdown').classList.add('hidden');
+  }
+
+  // Fecha os dropdowns clicando fora
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.notificacoes-wrapper')) {
+      document.getElementById('notificacoesDropdown').classList.add('hidden');
+    }
+    if (!e.target.closest('.usuario-wrapper')) {
+      document.getElementById('usuarioDropdown').classList.add('hidden');
+    }
+  });
+  function salvarConfiguracoes(event) {
+      event.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const telefone = document.getElementById('telefone').value;
+
+      alert(`✅ Dados atualizados com sucesso:\n\nNome: ${nome}\nEmail: ${email}\nTelefone: ${telefone}`);
+    }
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Gráfico de Tráfego por Hora
+  const ctxHora = document.getElementById('graficoHora').getContext('2d');
+  new Chart(ctxHora, {
+    type: 'line',
+    data: {
+      labels: ['06h', '08h', '10h', '12h', '14h', '16h', '18h', '20h'],
+      datasets: [{
+        label: 'Veículos por hora',
+        data: [120, 300, 280, 450, 400, 600, 750, 500],
+        backgroundColor: 'rgba(103, 228, 128, 0.2)',
+        borderColor: '#67e480',
+        borderWidth: 2,
+        tension: 0.4,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        x: { ticks: { color: '#fff' } },
+        y: { beginAtZero: true, ticks: { color: '#fff' } }
+      }
+    }
+  });
+
+  // Gráfico Comparativo Antes x Depois
+  const ctxComp = document.getElementById('graficoComparativo').getContext('2d');
+  new Chart(ctxComp, {
+    type: 'bar',
+    data: {
+      labels: ['Av. Brasil', 'Av. Paraná', 'Rua das Palmeiras'],
+      datasets: [
+        {
+          label: 'Antes da intervenção',
+          data: [500, 600, 450],
+          backgroundColor: '#67e480'
+        },
+        {
+          label: 'Depois da intervenção',
+          data: [300, 400, 290],
+          backgroundColor: '#e63946'
+        }
+      ]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        x: { ticks: { color: '#fff' } },
+        y: { beginAtZero: true, ticks: { color: '#fff' } }
+      }
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Gráfico de Tráfego Mensal
+  const ctxMensal = document.getElementById('graficoMensal').getContext('2d');
+  new Chart(ctxMensal, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'],
+      datasets: [{
+        label: 'Veículos por mês',
+        data: [12000, 13500, 12800, 14000, 15000, 14500, 16000, 17000],
+        backgroundColor: 'rgba(103, 228, 128, 0.2)',
+        borderColor: '#67e480',
+        borderWidth: 2,
+        tension: 0.4,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        x: { ticks: { color: '#fff' } },
+        y: { beginAtZero: true, ticks: { color: '#fff' } }
+      }
+    }
+  });
+
+  // Gráfico de Impacto por Região
+  const ctxRegiao = document.getElementById('graficoRegiao').getContext('2d');
+  new Chart(ctxRegiao, {
+    type: 'bar',
+    data: {
+      labels: ['Centro', 'Zona Sul', 'Zona Norte', 'Zona Leste', 'Zona Oeste'],
+      datasets: [{
+        label: 'Impacto médio (%)',
+        data: [12, 18, 10, 22, 15],
+        backgroundColor: [
+          '#67e480', '#ffdd57', '#e63946', '#4cc9f0', '#f9844a'
+        ]
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      },
+      scales: {
+        x: { ticks: { color: '#fff' } },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#fff' }
+        }
+      }
+    }
+  });
+</script>
+
+</main>
+</body>
+</html>

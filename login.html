@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro – PlanUrb</title>
+  <style>
+    :root {
+      --verde: #67e480;
+      --fundo: #121212;
+      --claro: #ffffff;
+      --cinza: #2d2d2d;
+      --texto: #dddddd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: var(--fundo);
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-attachment: fixed;
+        background-size: contain; /* <- alterado de 'cover' para 'contain' */
+        position: relative;
+        }
+    
+
+.form-container {
+  position: relative;
+  z-index: 1;
+}
+
+    .form-container {
+      background-color: rgba(18, 18, 18, 0.92);
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+
+    .form-container h1 {
+      color: var(--verde);
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--claro);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--cinza);
+      color: var(--claro);
+    }
+
+    input::placeholder {
+      color: #999;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--verde);
+      color: var(--fundo);
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #4cd964;
+    }
+
+    .voltar {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .voltar a {
+      color: var(--verde);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .voltar a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 25px;
+        border-radius: 10px;
+      }
+
+      .form-container h1 {
+        font-size: 1.4rem;
+      }
+    }
+    .background-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        }
+
+        .background-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* mantém proporção e cobre a tela */
+        object-position: center;
+        filter: brightness(0.3); /* escurece a imagem */
+}
+
+  </style>
+</head>
+<body>
+    
+
+  <div class="form-container">
+    <h1>Criar Conta</h1>
+    <form action="plano.html" method="post">
+      <div class="form-group">
+        <label for="nome">Nome completo</label>
+        <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+      </div>
+
+      <div class="form-group">
+        <label for="tipoConta">Tipo de conta</label>
+        <select id="tipoConta" name="tipoConta" required>
+          <option value="">Selecione</option>
+          <option value="prefeitura">Prefeitura</option>
+          <option value="empresa">Empresa</option>
+          <option value="pesquisa">Instituição de Pesquisa</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" placeholder="exemplo@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="telefone">Telefone</label>
+        <input type="tel" id="telefone" name="telefone" placeholder="(99) 99999-9999" required>
+      </div>
+
+      <button type="submit">Avançar</button>
+
+      <div class="voltar">
+        <a href="login.html">Já tem uma conta? Fazer login</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
